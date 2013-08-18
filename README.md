@@ -1,6 +1,6 @@
 # Cantata Sample
 
-A playground sample project for the Cantata Clojure library.
+A playground sample project for the [Cantata](https://github.com/jkk/cantata) Clojure library.
 
 It uses an adapted version of the Sakila database from MySQL, which models a movie rental store:
 
