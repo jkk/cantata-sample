@@ -50,7 +50,9 @@
    :category {:shortcuts {:film :film-category.film}}
    :customer {:shortcuts {:rented-film :rental.inventory.film
                           :city :address.city
-                          :country :city.country}}
+                          :country :city.country
+                          :city-name :city.city
+                          :country-name :country.country}}
    :store {:shortcuts {:rental :inventory.rental
                        :payment :rental.payment
                        :manager :store-manager.manager
@@ -102,13 +104,13 @@
   (c/query
     ds [:from :film
         :select [:title :language.name]
-        :where [:= "Canada" :renter.country.country]])
+        :where [:= "Canada" :renter.country-name]])
   
   ;; Prepared queries, with bindable parameters
   (let [pq (c/prepare-query
              ds [:from :film
                  :select [:title :language.name]
-                 :where [:= :?country :renter.country.country]])]
+                 :where [:= :?country :renter.country-name]])]
     (c/query ds pq :params {:country "Canada"}))
   
   ;; ...equivalent to:
