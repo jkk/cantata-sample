@@ -16,10 +16,30 @@ Clone the repo. Launch a Clojure REPL for the project according to your tastes. 
 (import-data! ds)
 
 ;; Example
-(c/query ds [:from :film :where [:= "ACADEMY DINOSAUR" :title]])
+(c/query
+    ds [:from :film
+        :select [:title :language.name]
+        :where [:= "Canada" :renter.country.country]])
 ```
 
 For more queries to try, see [core.clj](https://github.com/jkk/cantata-sample/blob/master/src/cantata_sample/core.clj).
+
+By default, an embedded H2 database is used. MySQL and PostgreSQL schemas are also included but require databases to be set up:
+
+MySQL:
+
+```
+$ mysql
+mysql> create database film_store;
+mysql> grant all on film_store.* to 'film_store'@'localhost' identified by 'film_store';
+```
+
+PostgreSQL (when prompted, enter "film_store" (without quotes) as password):
+
+```
+$ createuser -P film_store
+$ createdb -O film_store film_store
+```
 
 ## License
 

@@ -2,6 +2,7 @@
   (:require [cantata.core :as c]
             [cantata.data-source :as cds]
             [cantata.io :as cio]
+            [cantata.reflect :as cr]
             [clojure.java.io :as io]
             [clojure.string :as string])
   (:import java.util.zip.GZIPInputStream))
@@ -13,14 +14,20 @@
 
 (def mysql-spec
   {:subprotocol "mysql"
-   :subname "//127.0.0.1:3306/film_store"
+   :subname "//127.0.0.1/film_store"
+   :user "film_store"
+   :password "film_store"})
+
+(def psql-spec
+  {:subprotocol "postgresql"
+   :subname "//localhost/film_store"
    :user "film_store"
    :password "film_store"})
 
 (defn init-db!
   "Sets up our database with a schema (no data yet)"
   [ds]
-  (when (empty? (c/query ds "show tables"))
+  (when (empty? (cr/reflect-entities ds))
     (let [filename (str "create_" (cds/get-subprotocol ds) ".sql")
           sql (slurp (io/resource filename))]
       (doseq [stmt (remove string/blank? (string/split sql #";"))]
@@ -175,7 +182,8 @@
      :select [:id :city-name :country-name
               :manager.first-name :manager.last-name
               :%sum.payment.amount]
-     :group-by :id
+     :group-by [:id :city-name :country-name
+                :manager.id :manager.first-name :manager.last-name]
      :order-by [:country-name :city-name]})
   
   ;; Sales by category
