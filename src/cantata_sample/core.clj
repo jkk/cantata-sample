@@ -38,16 +38,7 @@
                       :category :film-category.category
                       :rental :inventory.rental
                       :renter :rental.customer
-                      :store :inventory.store}
-          ;:validate (constantly (c/problem "boo!"))
-          :hooks {} #_{:before-insert (fn [& _] (prn "before insert"))
-                  :after-insert (fn [& _] (prn "after insert"))
-                  :before-update (fn [& _] (prn "before update"))
-                  :after-update (fn [& _] (prn "after update"))
-                  :before-delete (fn [& _] (prn "before delete"))
-                  :after-delete (fn [& _] (prn "after delete"))
-                  :before-save (fn [& _] (prn "before save"))
-                  :after-save (fn [& _] (prn "after save"))}}
+                      :store :inventory.store}}
    :actor {:shortcuts {:film :film-actor.film}}
    :category {:shortcuts {:film :film-category.film}}
    :customer {:shortcuts {:rented-film :rental.inventory.film
