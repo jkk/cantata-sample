@@ -75,18 +75,9 @@
   
   (import-data! ds)
   
-  (c/query ds {:select :language.*})
-  
-  (c/queryf ds [:select :film.actor :where [:= 1 :id]])
-  
-  (c/query ds {:select [:title :release-year] :from :film})
-  
+  ;; Basics
   (c/query ds {:from :film :limit 1})
-  
-  (c/query ds "select * from actor")
-  
-  (c/query ds [:from :language
-               :select [:name :_language.film.id]])
+  (c/queryf ds [:select :film.actor :where [:= 1 :id]])
   
   ;; Queries are simple data. They can be built up like any other.
   (def full-film
@@ -152,6 +143,14 @@
   ;; Count of films that have never been rented
   (c/query-count ds [:from :film :without :rental])
   
+  ;; Old fashioned queries
+  (c/query ds "select * from actor")
+  (c/query ds ["select id from category where name=?" "Action"])
+  
+  ;; Reverse relationships (can be given nicer names with shortcuts)
+  (c/query ds [:from :language
+               :select [:name :_language.film.id]])
+  
   ;; Names of all categories a customer has rented - two ways:
   (c/queryf ds [:select :category.name
                 :where [:= 2 :film.renter.id]])
@@ -190,8 +189,6 @@
   (c/query ds [:from :category
                :select [:name :%sum.film.rental.payment.amount]
                :group-by :id])
-  
-  (c/query ds ["SELECT id FROM category WHERE name=?" "Action"])
   
   ;; Lazy - flat, single DB query
   (c/with-query-maps maps ds [:from :film :select [:title :rating :language.name]]
