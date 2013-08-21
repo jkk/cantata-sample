@@ -230,6 +230,7 @@
 (comment
   
   ;; For subquery and explicit query testing
+  ;; Borrowed from http://www.reddit.com/r/Python/comments/olech/is_django_considered_pythonic_now/c3ijtk9
   
   (def dm
     (c/data-model
