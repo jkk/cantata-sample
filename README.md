@@ -181,6 +181,52 @@ $ createdb -O film_store film_store
 ;; Prints all SQL queries and rolls back any changes
 (c/with-debug ds
   (c/cascading-delete-ids! ds :film 2))
+
+;; Subqueries and and explicit joins
+;; Borrowed from http://www.reddit.com/r/Python/comments/olech/is_django_considered_pythonic_now/c3ijtk9
+  
+(def dm
+  (c/data-model
+    {:user {:fields [:id :username]}
+     :addy {:fields [:id :user-id :street :city :state :zip]}}))
+  
+;; NYC addresses with two occupants
+(def two-occupant-ny
+  {:from :addy
+   :where [:= "New York" :city]
+   :group-by [:street :city :zip]
+   :having [:= 2 :%count.user-id]})
+
+;; Users different from each other
+(def userq
+  {:from :user
+   :join [[:user :u2] [:< :id :u2.id]]})
+
+;; Put it all together
+(def finalq
+  (c/build
+    userq
+    {:select [:* :u2.* :a1.* :a2.*]
+     :join [[:addy :a3] [:= :id :a3.user-id]
+            [:addy :a4] [:= :u2.id :a4.user-id]
+            [two-occupant-ny :occ2] [:and
+                                     [:= :occ2.street :a3.street]
+                                     [:= :occ2.city :a3.city]
+                                     [:= :occ2.state :a3.state]
+                                     [:= :occ2.zip :a3.zip]
+                                     [:= :occ2.street :a4.street]
+                                     [:= :occ2.city :a4.city]
+                                     [:= :occ2.state :a4.state]
+                                     [:= :occ2.zip :a4.zip]]]
+     :left-join [[:addy :a1] [:= :id :a1.user-id]
+                 [:addy :a2] [:= :u2.id :a2.user-id]]
+     :where [:not [:exists {:from :addy
+                            :select :id
+                            :where [:and
+                                    [:not= "New York" :city]
+                                    [:in :user-id [:user.id :u2.id]]]}]]}))
+
+(c/to-sql dm finalq :quoting :ansi)
 ```
 
 ## License

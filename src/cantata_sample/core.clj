@@ -232,7 +232,6 @@
   ;; For subquery and explicit query testing
   
   (def dm
-    ;; TODO: test without fields
     (c/data-model
       {:user {:fields [:id :username]}
        :addy {:fields [:id :user-id :street :city :state :zip]}}))
@@ -251,7 +250,7 @@
 
   ;; Put it all together
   (def finalq
-    (c/build-query
+    (c/build
       userq
       {:select [:* :u2.* :a1.* :a2.*]
        :join [[:addy :a3] [:= :id :a3.user-id]
@@ -273,67 +272,7 @@
                                       [:not= "New York" :city]
                                       [:in :user-id [:user.id :u2.id]]]}]]}))
   
-  ;; cantata
-  ["SELECT \"user\".\"id\" AS \"id\", \"user\".\"username\" AS \"username\", \"u2\".\"id\" AS \"u2.id\",
-      \"u2\".\"username\" AS \"u2.username\", \"a1\".\"id\" AS \"a1.id\",
-      \"a1\".\"user_id\" AS \"a1.user_id\", \"a1\".\"street\" AS \"a1.street\",
-      \"a1\".\"city\" AS \"a1.city\", \"a1\".\"state\" AS \"a1.state\", \"a1\".\"zip\" AS \"a1.zip\",
-      \"a2\".\"id\" AS \"a2.id\", \"a2\".\"user_id\" AS \"a2.user_id\",
-      \"a2\".\"street\" AS \"a2.street\", \"a2\".\"city\" AS \"a2.city\",
-      \"a2\".\"state\" AS \"a2.state\", \"a2\".\"zip\" AS \"a2.zip\"
-   FROM \"user\" AS \"user\"
-   INNER JOIN \"user\" AS \"u2\" ON \"user\".\"id\" < \"u2\".\"id\"
-   INNER JOIN \"addy\" AS \"a3\" ON \"user\".\"id\" = \"a3\".\"user_id\"
-   INNER JOIN \"addy\" AS \"a4\" ON \"u2\".\"id\" = \"a4\".\"user_id\"
-   INNER JOIN (SELECT \"user\".\"id\" AS \"id\", \"user_id\" AS \"user_id\",
-                 \"street\" AS \"street\", \"city\" AS \"city\",
-                 \"state\" AS \"state\", \"zip\" AS \"zip\"
-               FROM \"addy\" AS \"addy\"
-               WHERE ? = \"city\"
-               GROUP BY \"street\", \"city\", \"zip\"
-               HAVING 2 = count(\"user_id\")) AS \"occ2\"
-              ON (\"occ2\".\"street\" = \"a3\".\"street\" AND \"occ2\".\"city\" = \"a3\".\"city\"
-                  AND \"occ2\".\"state\" = \"a3\".\"state\" AND \"occ2\".\"zip\" = \"a3\".\"zip\"
-                  AND \"occ2\".\"street\" = \"a4\".\"street\" AND \"occ2\".\"city\" = \"a4\".\"city\"
-                  AND \"occ2\".\"state\" = \"a4\".\"state\" AND \"occ2\".\"zip\" = \"a4\".\"zip\")
-   LEFT JOIN \"addy\" AS \"a1\" ON \"user\".\"id\" = \"a1\".\"user_id\"
-   LEFT JOIN \"addy\" AS \"a2\" ON \"u2\".\"id\" = \"a2\".\"user_id\"
-   WHERE NOT exists((SELECT \"user\".\"id\" AS \"id\"
-                     FROM \"addy\" AS \"addy\"
-                     WHERE (? <> \"city\"
-                            AND (\"user_id\" in (\"user\".\"id\", \"u2\".\"id\")))))"
-   "New York" "New York"]
-  
-  ;; modelo
-  ["SELECT user.id AS \"id\", user.username AS \"username\", u2.id AS \"u2.id\",
-       u2.username AS \"u2.username\", a1.id AS \"a1.id\",
-       a1.user_id AS \"a1.user-id\", a1.street AS \"a1.street\",
-       a1.city AS \"a1.city\", a1.state AS \"a1.state\", a1.zip AS \"a1.zip\",
-       a2.id AS \"a2.id\", a2.user_id AS \"a2.user-id\",
-       a2.street AS \"a2.street\", a2.city AS \"a2.city\",
-       a2.state AS \"a2.state\", a2.zip AS \"a2.zip\"
-   FROM user AS user
-   INNER JOIN user AS u2 ON user.id < u2.id
-   INNER JOIN address AS a3 ON user.id = a3.user_id
-   INNER JOIN address AS a4 ON u2.id = a4.user_id
-   INNER JOIN (SELECT address.id AS id, address.user_id AS user_id,
-                   address.street AS street, address.city AS city
-                   address.state AS state, address.zip AS zip
-               FROM address AS address
-               WHERE ? = address.city
-               GROUP BY address.street, address.city, address.zip
-               HAVING 2 = COUNT(address.user_id)) AS occ2
-              ON (occ2.street = a3.street AND occ2.city = a3.city
-                  AND occ2.state = a3.state AND occ2.zip = a3.zip
-                  AND occ2.street = a4.street AND occ2.city = a4.city
-                  AND occ2.state = a4.state AND occ2.zip = a4.zip)
-   LEFT JOIN address AS a1 ON user.id = a1.user_id
-   LEFT JOIN address AS a2 ON u2.id = a2.user_id
-   WHERE NOT EXISTS((SELECT address.id AS id
-                     FROM address AS address
-                     WHERE (? <> address.city
-                            AND (address.user_id IN (user.id, u2.id)))))"
-   "New York" "New York"]
+  (c/to-sql dm finalq :quoting :ansi)
   
   
   
