@@ -84,7 +84,7 @@
   ;; Queries are simple data. They can be built up like any other.
   (def full-film
     {:from :film
-     :include [:category :actor :language :original-language]})
+     :select [:* :category :actor :language :original-language]})
   
   ;; Single film with nested related info - single DB query
   (c/query ds [full-film :where [:= :id 123]])
@@ -126,7 +126,7 @@
    WHERE country.country = 'Canada'"
   
   ;; Fetch by id
-  (c/by-id ds :film 1 [:include [:category :language]])
+  (c/by-id ds :film 1 [:select [:* :category :language]])
   
   ;; Predicates (such as the :where clause) are also simple data
   (def kid-film {:from :film
@@ -137,8 +137,7 @@
   
   ;; Without nesting - single DB query with redundant values
   (c/query ds [:from :film
-               :select [:id :title]
-               :include :actor
+               :select [:id :title :actor]
                :where [:= 1 :id]]
            :flat true)
   
