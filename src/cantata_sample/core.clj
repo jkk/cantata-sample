@@ -141,6 +141,15 @@
                :where [:= 1 :id]]
            :flat true)
   
+  ;; Explicit joins
+  (c/query
+    ds [:from :film
+        :select [:title :actor.name]
+        :where [:= 1 :id]
+        :join [[:film-actor :fa] [:= :id :fa.film-id]
+               :actor [:= :fa.actor-id :actor.id]]]
+    :flat true)
+  
   ;; Count of films that have never been rented
   (c/query-count ds [:from :film :without :rental])
   
