@@ -70,8 +70,7 @@
       :pooled true
       :clob-str true
       :blob-bytes true
-      :joda-dates true
-      :unordered-maps true)))
+      :joda-dates true)))
 
 (comment
   
