@@ -49,14 +49,17 @@ $ createdb -O film_store film_store
 (c/query ds [full-film :where [:= :id 123]])
   
 ;; Same results - 3 DB queries (an extra for each to-many relationship)
-(c/querym ds [full-film :where [:= :id 123]])
+(c/query ds [full-film :where [:= :id 123]]
+         :strategy :multiple)
   
 ;; See the SQL being executed
 (c/verbose
-  (c/querym ds [full-film :where [:= :id 123]]))
+  (c/query ds [full-film :where [:= :id 123]]
+           :strategy :multiple))
   
 ;; Multiple films with related info. Also backed by 3 DB queries.
-(c/querym ds [full-film :limit 10])
+(c/query ds [full-film :limit 10]
+         :strategy :multiple)
   
 ;; Title and language of films rented by customers living in Canada.
 ;; 7 implicit joins performed.
