@@ -149,8 +149,7 @@
         :select [:title :actor.name]
         :where [:= 1 :id]
         :join [[:film-actor :fa] [:= :id :fa.film-id]
-               :actor [:= :fa.actor-id :actor.id]]]
-    :flat true)
+               :actor [:= :fa.actor-id :actor.id]]])
   
   ;; Count of films that have never been rented
   (c/query-count ds [:from :film :without :rental])
