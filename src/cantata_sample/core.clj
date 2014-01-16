@@ -277,7 +277,7 @@
        :left-join [[:addy :a1] [:= :id :a1.user-id]
                    [:addy :a2] [:= :u2.id :a2.user-id]]
        :where [:not [:exists {:from :addy
-                              :select :id
+                              :select [:id]
                               :where [:and
                                       [:not= "New York" :city]
                                       [:in :user-id [:user.id :u2.id]]]}]]}))
